@@ -23,26 +23,41 @@ struct Home: View {
             .labelsHidden()
             .datePickerStyle(.graphical)
             
-            DisclosureGroup(isExpanded: $showPendingTasks) {
-                // カスタムCore Data Filter にて、選択された日の pending tasks のみを表示する領域.
-                CustomFilteringDataView(displayPendingTask: true, filterDate: filterDate) {
-                    TaskRow(task: $0, isPendingTask: true)
+            CustomFilteringDataView(filterDate: filterDate) { pendingTasks, completedTasks in
+                
+                DisclosureGroup(isExpanded: $showPendingTasks) {
+                    // カスタムCore Data Filter にて、選択された日の pending tasks のみを表示する領域.
+                    if pendingTasks.isEmpty {
+                        Text("タスクがありません！")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    } else {
+                        ForEach(pendingTasks) {
+                            TaskRow(task: $0, isPendingTask: true)
+                        }
+                    }
+                } label: {
+                    Text("Pending Task's \(pendingTasks.isEmpty ? "" : "(\(pendingTasks.count))")")
+                        .font(.caption)
+                        .foregroundColor(.gray)
                 }
-            } label: {
-                Text("Pending Task's")
-                    .font(.caption)
-                    .foregroundColor(.gray)
-            }
-            
-            DisclosureGroup(isExpanded: $showCompletedTasks) {
-                // カスタムCore Data Filter にて、選択された日の completed tasks のみを表示する領域.
-                CustomFilteringDataView(displayPendingTask: false, filterDate: filterDate) {
-                    TaskRow(task: $0, isPendingTask: false)
+                
+                DisclosureGroup(isExpanded: $showCompletedTasks) {
+                    // カスタムCore Data Filter にて、選択された日の completed tasks のみを表示する領域.
+                    if completedTasks.isEmpty {
+                        Text("タスクがありません！")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    } else {
+                        ForEach(completedTasks) {
+                            TaskRow(task: $0, isPendingTask: false)
+                        }
+                    }
+                } label: {
+                    Text("Completed Task's \(completedTasks.isEmpty ? "" : "(\(completedTasks.count))")")
+                        .font(.caption)
+                        .foregroundColor(.gray)
                 }
-            } label: {
-                Text("Completed Task's")
-                    .font(.caption)
-                    .foregroundColor(.gray)
             }
         }
         .toolbar {
