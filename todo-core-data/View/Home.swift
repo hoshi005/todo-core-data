@@ -157,8 +157,10 @@ struct TaskRow: View {
         }
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button(role: .destructive) {
-                env.managedObjectContext.delete(task)
-                save()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    env.managedObjectContext.delete(task)
+                    save()
+                }
             } label: {
                 Image(systemName: "trash.fill")
             }
