@@ -152,6 +152,14 @@ struct TaskRow: View {
                 save()
             }
         }
+        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+            Button(role: .destructive) {
+                env.managedObjectContext.delete(task)
+                save()
+            } label: {
+                Image(systemName: "trash.fill")
+            }
+        }
     }
     
     /// context saving method.
