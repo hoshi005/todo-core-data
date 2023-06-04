@@ -23,7 +23,7 @@ struct Home: View {
             .labelsHidden()
             .datePickerStyle(.graphical)
             
-            CustomFilteringDataView(filterDate: filterDate) { pendingTasks, completedTasks in
+            CustomFilteringDataView(filterDate: $filterDate) { pendingTasks, completedTasks in
                 
                 DisclosureGroup(isExpanded: $showPendingTasks) {
                     // カスタムCore Data Filter にて、選択された日の pending tasks のみを表示する領域.
@@ -160,14 +160,21 @@ struct TaskRow: View {
                 showKeyboard = true
             }
         }
+        .onDisappear {
+            removeEmptyTask()
+            save()
+        }
         // ユーザがアプリを離れたときのコンテンツの検証.
         .onChange(of: env.scenePhase) { newValue in
             // ユーザーがタスクタイトルを入力せずにアプリを閉じたり最小化したりして、
             // 最終的にアプリを閉じたとき、空のタスクが残っていることを考慮してください。
             // そのような場合、アプリケーションの状態がアクティブでないときは、空のタスクを破棄しています。
             if newValue != .active {
-                removeEmptyTask()
-                save()
+                showKeyboard = false
+                DispatchQueue.main.async {
+                    removeEmptyTask()
+                    save()
+                }
             }
         }
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {

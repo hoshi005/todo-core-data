@@ -8,12 +8,15 @@
 import SwiftUI
 
 struct CustomFilteringDataView<Content: View>: View {
+    
     @FetchRequest private var result: FetchedResults<Task>
+    @Binding private var filterDate: Date
     var content: ([Task], [Task]) -> Content
-    init(filterDate: Date, @ViewBuilder content: @escaping ([Task], [Task]) -> Content) {
+    
+    init(filterDate: Binding<Date>, @ViewBuilder content: @escaping ([Task], [Task]) -> Content) {
         // taskのフィルタリングのための Predicate を作成.
         let calendar = Calendar.current
-        let startOfDay = calendar.startOfDay(for: filterDate)
+        let startOfDay = calendar.startOfDay(for: filterDate.wrappedValue)
         let endOfDay = calendar.date(bySettingHour: 23, minute: 59, second: 59, of: startOfDay)!
         
         let predicate = NSPredicate(format: "date >= %@ AND date <= %@", argumentArray: [startOfDay, endOfDay])
@@ -23,10 +26,23 @@ struct CustomFilteringDataView<Content: View>: View {
         ], predicate: predicate, animation: .easeInOut(duration: 0.25))
         
         self.content = content
+        self._filterDate = filterDate
     }
     
     var body: some View {
         content(separateTasks().0, separateTasks().1)
+            .onChange(of: filterDate) { newValue in
+                // clearing old predicate
+                result.nsPredicate = nil
+                
+                let calendar = Calendar.current
+                let startOfDay = calendar.startOfDay(for: newValue)
+                let endOfDay = calendar.date(bySettingHour: 23, minute: 59, second: 59, of: startOfDay)!
+                
+                let predicate = NSPredicate(format: "date >= %@ AND date <= %@", argumentArray: [startOfDay, endOfDay])
+                
+                result.nsPredicate = predicate
+            }
     }
     
     func separateTasks() -> ([Task], [Task]) {
