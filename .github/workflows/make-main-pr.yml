@@ -1,0 +1,31 @@
+name: PRがdevelopにマージされたら、main向けにPRを作成する.
+
+on:
+  pull_request:
+    branches:
+      - develop
+    types:
+      - closed
+
+jobs:
+  create-main-pr:
+    runs-on: ubuntu-latest
+
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PR_TITLE: '[main]developをmainに取り込むPR'
+    
+    steps:
+      - uses: actions/checkout@v3
+
+      # main向けのPRがすでに存在するかどうかのチェック.
+      - name: check whether PR has existed or not
+        id: check_pr_count
+        run: |
+          echo "::set-output name=count::$(gh pr list -S ${PR_TITLE}' in:title' -B main | wc -l)"
+      
+      # 同じタイトルのPRがなければ、developをmainに取り込むPRを作成.
+      - name: create PR to marge develop into main
+        if: steps.check_pr_count.outputs.count == 0
+        run: |
+          gh pr create -B main -H develop -t ${PR_TITLE} -b ""
