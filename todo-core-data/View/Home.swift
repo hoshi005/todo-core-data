@@ -98,6 +98,7 @@ struct TaskRow: View {
                     .font(.title)
                     .foregroundColor(.blue)
             }
+            .buttonStyle(.plain)
             
             VStack(alignment: .leading, spacing: 4.0) {
                 TextField("Task Title", text: .init(get: {
@@ -112,6 +113,8 @@ struct TaskRow: View {
                     removeEmptyTask()
                     save()
                 }
+                .foregroundColor(isPendingTask ? .primary : .gray)
+                .strikethrough(!isPendingTask, pattern: .dash, color: .primary)
                 
                 // custom date picker.
                 Text((task.date ?? .init()).formatted(date: .omitted, time: .shortened))
