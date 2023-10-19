@@ -16,7 +16,7 @@ jobs:
       PR_TITLE: '[main]developをmainに取り込むPR'
     
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # main向けのPRがすでに存在するかどうかのチェック.
       - name: check whether PR has existed or not
